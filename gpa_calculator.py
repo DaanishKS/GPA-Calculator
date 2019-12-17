@@ -55,7 +55,7 @@ def gpa_calculator(file):
 
     gpa_data = {
         'School': {
-            'Total': {
+            'Overall': {
                 'GPA Points': 0,
                 'Credits': 0,
                 'GPA': 0
@@ -72,7 +72,7 @@ def gpa_calculator(file):
             }
         },
         'AMCAS': {
-            'Total': {
+            'Overall': {
                 'GPA Points': 0,
                 'Credits': 0,
                 'GPA': 0
@@ -89,7 +89,7 @@ def gpa_calculator(file):
             }
         },
         'TMDSAS': {
-            'Total': {
+            'Overall': {
                 'GPA Points': 0,
                 'Credits': 0,
                 'GPA': 0
@@ -117,8 +117,8 @@ def gpa_calculator(file):
 
     for credit_hours, grade, class_type in transcript:
         for i, j in gpa_data.items():
-            j['Total']['GPA Points'] += credit_hours * j['Grade Key'][grade]
-            j['Total']['Credits'] += credit_hours
+            j['Overall']['GPA Points'] += credit_hours * j['Grade Key'][grade]
+            j['Overall']['Credits'] += credit_hours
 
             if class_type == 'BCPM':
                 j['BCPM']['GPA Points'] += credit_hours * j['Grade Key'][grade]

@@ -1,6 +1,6 @@
 import pandas as pd
 import sys
-import json
+import yaml
 
 
 def gpa_calculator(file):
@@ -136,8 +136,8 @@ def gpa_calculator(file):
             print(f'{i} {k} GPA: {v["GPA"]}')
         print()
 
-    with open('GPA Report.json', 'w') as file:
-        json.dump(gpa_data, file)
+    with open('GPA Report.yml', 'w') as file:
+        yaml.dump(gpa_data, file)
 
     return gpa_data
 

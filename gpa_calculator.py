@@ -136,9 +136,9 @@ def gpa_calculator(file):
         j.pop('Grade Key')
         for k, v in j.items():
             try:
-            v['GPA'] = round(v['GPA Points'] / v['Credits'], 3)
-            v['GPA Points'] = round(v['GPA Points'], 3)
-            print(f'{i} {k} GPA: {v["GPA"]}')
+                v['GPA'] = round(v['GPA Points'] / v['Credits'], 3)
+                v['GPA Points'] = round(v['GPA Points'], 3)
+                print(f'{i} {k} GPA: {v["GPA"]}')
             except ZeroDivisionError:
                 print(f'{i} {k} GPA: N/A')
         print()

@@ -113,27 +113,34 @@ def gpa_calculator(file):
 
     df = pd.read_csv(file)
 
-    transcript = df[['Credit Hours', 'Grade', 'Type']].values.tolist()
+    transcript = df[['Credit_Hours', 'Grade', 'Type']].values.tolist()
 
     for credit_hours, grade, class_type in transcript:
         for i, j in gpa_data.items():
-            j['Overall']['GPA Points'] += credit_hours * j['Grade Key'][grade]
+            j['Overall'][
+                'GPA Points'] += credit_hours * j['Grade Key'][grade.strip()]
             j['Overall']['Credits'] += credit_hours
 
             if class_type == 'BCPM':
-                j['BCPM']['GPA Points'] += credit_hours * j['Grade Key'][grade]
+                j['BCPM'][
+                    'GPA Points'] += credit_hours * j['Grade Key'][grade.strip(
+                    )]
                 j['BCPM']['Credits'] += credit_hours
 
             elif class_type == 'AO':
-                j['AO']['GPA Points'] += credit_hours * j['Grade Key'][grade]
+                j['AO']['GPA Points'] += credit_hours * j['Grade Key'][grade.
+                                                                       strip()]
                 j['AO']['Credits'] += credit_hours
 
     for i, j in gpa_data.items():
         j.pop('Grade Key')
         for k, v in j.items():
+            try:
             v['GPA'] = round(v['GPA Points'] / v['Credits'], 3)
             v['GPA Points'] = round(v['GPA Points'], 3)
             print(f'{i} {k} GPA: {v["GPA"]}')
+            except ZeroDivisionError:
+                print(f'{i} {k} GPA: N/A')
         print()
 
     with open('GPA Report.yml', 'w') as file:

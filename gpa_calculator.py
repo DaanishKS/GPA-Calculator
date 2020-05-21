@@ -1,153 +1,196 @@
 import pandas as pd
-import sys
+import numpy as np
+import json
 import yaml
+import os
 
 
-def gpa_calculator(file):
+class Transcript:
+    """
+    The Transcript class holds data related to an actual university
+    transcript and performs GPA calculation operations.
 
-    university_grade_key = {
-        'A+': 4.00,
-        'A': 4.00,
-        'A-': 3.67,
-        'B+': 3.33,
-        'B': 3.00,
-        'B-': 2.67,
-        'C+': 2.33,
-        'C': 2.00,
-        'C-': 1.67,
-        'D+': 1.33,
-        'D': 1.00,
-        'D-': 0.67,
-        'F': 0.00
-    }
+    In short, there are three GPA scales that can be used to translate
+    letter grades to GPA points: the University scale, AMCAS scale, and
+    TMDSAS scale. The latter two are utilized in the calculation of GPA
+    for medical school admissions.
 
-    aamc_grade_key = {
-        'A+': 4.0,
-        'A': 4.0,
-        'A-': 3.7,
-        'B+': 3.3,
-        'B': 3.0,
-        'B-': 2.7,
-        'C+': 2.3,
-        'C': 2.0,
-        'C-': 1.7,
-        'D+': 1.3,
-        'D': 1.0,
-        'D-': 0.7,
-        'F': 0.0
-    }
+    Furthermore, there are three "types" of GPAs that can be calculated
+    from a transcript: Overall; Biology, Chemistry, Physics, Math
+    (BCPM); and All Other (AO). Again, the latter two are primarily
+    considered for medical school admissions.
 
-    tmdsas_grade_key = {
-        'A+': 4.0,
-        'A': 4.0,
-        'A-': 4.0,
-        'B+': 3.0,
-        'B': 3.0,
-        'B-': 3.0,
-        'C+': 2.0,
-        'C': 2.0,
-        'C-': 2.0,
-        'D+': 1.0,
-        'D': 1.0,
-        'D-': 1.0,
-        'F': 0.0
-    }
+    Thus, there are nine possible GPA permutations of GPA scale and type.
 
-    gpa_data = {
-        'School': {
-            'Overall': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            },
-            'BCPM': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            },
-            'AO': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            }
-        },
-        'AMCAS': {
-            'Overall': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            },
-            'BCPM': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            },
-            'AO': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            }
-        },
-        'TMDSAS': {
-            'Overall': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            },
-            'BCPM': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            },
-            'AO': {
-                'GPA Points': 0,
-                'Credits': 0,
-                'GPA': 0
-            }
+    Parameters
+    ----------
+    csv_file : str
+        This is the name of the CSV file from where we are obtaining our
+        transcript data.
+
+    Attributes
+    ----------
+    data : pandas.DataFrame
+        This is the internal representation of the data obtained from
+        the original CSV file. The usage of Pandas allows for efficient
+        value manipulation and calculation.
+    gpa_scales : list of str
+        This is a list of all acceptable GPA scales that are eligible for
+        calculation. These scales translate course letter grades to GPA
+        points.
+    gpa_types : list of str
+        This is a list of all acceptable GPA types that are eligible for
+        calculation. These types dictate which courses will be considered
+        when calculating a GPA.
+    """
+
+    def __init__(self, csv_file):
+        with open('gpa_scales.json', 'r') as f:
+            gpa_scales = json.load(f)
+
+        df = pd.read_csv(csv_file)
+        for col in list(df.columns):
+            if df[col].dtype == 'object':
+                df[col] = df[col].str.strip()
+
+        # Calculate various GPA points for each course.
+        for scale in gpa_scales:
+            gpa_points = [
+                gpa_scales[scale][row.Grade] * row.Credit_Hours
+                for row in df.itertuples()
+            ]
+            df[f'{scale}_GPA_Points'] = np.asarray(gpa_points)
+
+        self.data = df
+        self.gpa_scales = ['University', 'AMCAS', 'TMDSAS']
+        self.gpa_types = ['Overall', 'BCPM', 'AO']
+
+    def calculate_gpa(self,
+                      periods=None,
+                      round_place=None,
+                      gpa_scale='University',
+                      gpa_type='Overall'):
+        """
+        Calculates cumulative GPAs, or over a given set of grading periods.
+
+        Parameters
+        ----------
+        periods : list of tuples of int, str; default None
+            If provided, determines the grading periods (i.e., semesters)
+            over which GPA should be calculated.
+            Ex. [(2018, 'Fall'), (2019, 'Spring')]
+        round_place: int, default None
+            If provided, will round the output to the specified number of
+            places after the decimal.
+        gpa_scale : {'University', 'AMCAS', 'TMDSAS'}, default 'University'
+            Determines which GPA scale will be used when calculating
+            cumulative GPA.
+        gpa_type : {'Overall', 'BCPM', 'A0'}, default 'Overall'
+            Determines what type of cumulative GPA will be calculated.
+
+        Returns
+        -------
+        result : dict
+            The resultant cumulative GPA.
+
+        Raises
+        ------
+        ValueError
+            If parameters gpa_scale or gpa_type do not equal an acceptable
+            value.
+        """
+        if gpa_scale not in self.gpa_scales:
+            raise ValueError('gpa_scale is not valid.')
+        if gpa_type not in self.gpa_types:
+            raise ValueError('gpa_type is not valid}')
+
+        df = self.data.copy()
+
+        if periods:
+            filtered_df = df[df['Year'] == periods[0][0]][df['Semester'] ==
+                                                          periods[0][1]]
+            if len(periods) > 1:
+                del periods[0]
+                for year, semester in periods:
+                    filtered_df = filtered_df.append(
+                        df[df['Year'] == year][df['Semester'] == semester])
+            df = filtered_df.copy()
+
+        # Drop courses that do not count toward GPA at all.
+        df.drop(df[df['Grade'] == 'CR'].index, inplace=True)
+        df.drop(df[df['Grade'] == 'NC'].index, inplace=True)
+
+        # Only include courses that contribute to selected GPA type.
+        if gpa_type == 'BCPM':
+            df = df[df['Type'] == 'BCPM']
+        elif gpa_type == 'AO':
+            df = df[df['Type'] == 'AO']
+
+        gpa_point_sum = np.sum(df[f'{gpa_scale}_GPA_Points'])
+        credits_count = np.sum(df['Credit_Hours'])
+        calculated_gpa = gpa_point_sum / credits_count
+
+        result = {
+            'GPA Point Sum': gpa_point_sum.item(),
+            'Credit Hours': credits_count.item(),
+            'GPA': calculated_gpa.item()
         }
-    }
 
-    gpa_data['School']['Grade Key'] = university_grade_key
-    gpa_data['AMCAS']['Grade Key'] = aamc_grade_key
-    gpa_data['TMDSAS']['Grade Key'] = tmdsas_grade_key
+        if round_place:
+            result['GPA Point Sum'] = round(result['GPA Point Sum'],
+                                            round_place)
+            result['GPA'] = round(result['GPA'], round_place)
 
-    df = pd.read_csv(file)
+        return result
 
-    transcript = df[['Credit_Hours', 'Grade', 'Type']].values.tolist()
+    def gpa_report(self, periods=None, round_place=None, file_path=None):
+        """
+        Calculates all possible GPA permutations.
 
-    for credit_hours, grade, class_type in transcript:
-        for i, j in gpa_data.items():
-            j['Overall'][
-                'GPA Points'] += credit_hours * j['Grade Key'][grade.strip()]
-            j['Overall']['Credits'] += credit_hours
+        Parameters
+        ----------
+        periods : list of tuples of int, str; default None
+            If provided, determines the grading periods (i.e., semesters)
+            over which GPA should be calculated.
+            Ex. [(2018, 'Fall'), (2019, 'Spring')]
+        round_place: int, default None
+            If provided, will round the output to the specified number of
+            places after the decimal.
+        file_path : {'*.json', '*.yml', '*.yaml', None}, default None
+            If provided, prints the computed GPA report as either a JSON
+            or YAML.
 
-            if class_type == 'BCPM':
-                j['BCPM'][
-                    'GPA Points'] += credit_hours * j['Grade Key'][grade.strip(
-                    )]
-                j['BCPM']['Credits'] += credit_hours
+        Returns
+        -------
+        report : dict
+            The results of the GPA report.
 
-            elif class_type == 'AO':
-                j['AO']['GPA Points'] += credit_hours * j['Grade Key'][grade.
-                                                                       strip()]
-                j['AO']['Credits'] += credit_hours
+        Raises
+        ------
+        ValueError
+            If file extension is not JSON or YAML.
+        """
+        # Initialize empty nested dict
+        report = {n: {m: '' for m in self.gpa_types} for n in self.gpa_scales}
 
-    for i, j in gpa_data.items():
-        j.pop('Grade Key')
-        for k, v in j.items():
-            try:
-                v['GPA'] = round(v['GPA Points'] / v['Credits'], 3)
-                v['GPA Points'] = round(v['GPA Points'], 3)
-                print(f'{i} {k} GPA: {v["GPA"]}')
-            except ZeroDivisionError:
-                print(f'{i} {k} GPA: N/A')
-        print()
+        # Populate dict
+        for gpa_scale in report.keys():
+            for gpa_type in report[gpa_scale].keys():
+                report[gpa_scale][gpa_type] = self.calculate_gpa(
+                    periods, round_place, gpa_scale, gpa_type)
 
-    with open('GPA Report.yml', 'w') as file:
-        yaml.dump(gpa_data, file)
+        if file_path:
+            file_name, file_extension = os.path.splitext(file_path)
+            if file_extension == '.json':
+                with open(file_path, 'w') as fp:
+                    json.dump(report, fp, indent=4)
+                print(f'"{file_path}" created/updated.')
+            elif (file_extension == '.yml') or (file_extension == '.yaml'):
+                with open(file_path, 'w') as fp:
+                    yaml.dump(report, fp)
+                print(f'"{file_path}" created/updated.')
+            else:
+                raise ValueError(
+                    '"{file_extension}" is not a valid file extension.')
 
-    return gpa_data
-
-
-if __name__ == "__main__":
-    gpa_calculator(sys.argv[1])
+        return report

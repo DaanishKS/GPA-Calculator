@@ -1,5 +1,6 @@
 Year,Semester,Course,Credit_Hours,Grade,Type
-2016,Fall,General Chemistry I,3,B,BCPM
-2016,Fall,Introduction to Theater,3,A,AO
-2016,Fall,MATH 2415,4,A-,BCPM
-2017,Spring,CHEM 1312,3,A+,BCPM
+2016,Fall  ,General Chemistry I    ,3,B+,BCPM
+2016,Fall  ,Introduction to Theater,3,A ,AO
+2016,Fall  ,MATH 2415              ,4,A-,BCPM
+2017,Spring,CHEM 1312              ,3,A+,BCPM
+2017,Summer,CHEM 2323              ,3,B ,BCPM

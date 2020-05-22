@@ -24,7 +24,7 @@ $ pipenv run python cli.py
 Alternatively, you can execute the `gpa_calculator.exe` file:
 
 ```console
-$ .\gpa_calculator.exe
+$ .\gpa_calculator_v0.3.exe
 ```
 
 If you wish to build the executable file yourself, use the following sequence of commands (skip the first if you have `pipenv` already installed):
@@ -33,5 +33,5 @@ If you wish to build the executable file yourself, use the following sequence of
 $ pip install pipenv
 $ pipenv shell
 $ pipenv install
-$ pyinstaller cli.py -F -n gpa_calculator --hidden-import="pkg_resources.py2_warn"
+$ pyinstaller cli.py -F -n gpa_calculator_v0.3 --hidden-import="pkg_resources.py2_warn"
 ```

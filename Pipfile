@@ -4,11 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pyinstaller = ">=3.6"
 
 [packages]
 numpy = ">=1.18.3"
 pandas = ">=1.0.3"
 pyyaml = ">=5.3.1"
+prompt-toolkit = ">=3.0.5"
 
 [requires]
 python_version = "3.6"

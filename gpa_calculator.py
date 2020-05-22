@@ -65,16 +65,18 @@ class Transcript:
         self.gpa_scales = ['University', 'AMCAS', 'TMDSAS']
         self.gpa_types = ['Overall', 'BCPM', 'AO']
 
-    def calculate_gpa(self,
-                      periods=None,
-                      round_place=None,
-                      gpa_scale='University',
-                      gpa_type='Overall'):
+    def calculate_gpa(self, gpa_scale, gpa_type,
+                      periods=None, round_place=None):
         """
         Calculates cumulative GPAs, or over a given set of grading periods.
 
         Parameters
         ----------
+        gpa_scale : {'University', 'AMCAS', 'TMDSAS'}, default 'University'
+            Determines which GPA scale will be used when calculating
+            cumulative GPA.
+        gpa_type : {'Overall', 'BCPM', 'A0'}, default 'Overall'
+            Determines what type of cumulative GPA will be calculated.
         periods : list of tuples of int, str; default None
             If provided, determines the grading periods (i.e., semesters)
             over which GPA should be calculated.
@@ -82,11 +84,6 @@ class Transcript:
         round_place: int, default None
             If provided, will round the output to the specified number of
             places after the decimal.
-        gpa_scale : {'University', 'AMCAS', 'TMDSAS'}, default 'University'
-            Determines which GPA scale will be used when calculating
-            cumulative GPA.
-        gpa_type : {'Overall', 'BCPM', 'A0'}, default 'Overall'
-            Determines what type of cumulative GPA will be calculated.
 
         Returns
         -------
@@ -143,7 +140,7 @@ class Transcript:
 
         return result
 
-    def gpa_report(self, periods=None, round_place=None, file_path=None):
+    def gpa_report(self, periods=None, round_place=None):
         """
         Calculates all possible GPA permutations.
 
@@ -153,22 +150,14 @@ class Transcript:
             If provided, determines the grading periods (i.e., semesters)
             over which GPA should be calculated.
             Ex. [(2018, 'Fall'), (2019, 'Spring')]
-        round_place: int, default None
+        round_place: {int, None}, default 3
             If provided, will round the output to the specified number of
             places after the decimal.
-        file_path : {'*.json', '*.yml', '*.yaml', None}, default None
-            If provided, prints the computed GPA report as either a JSON
-            or YAML.
 
         Returns
         -------
         report : dict
             The results of the GPA report.
-
-        Raises
-        ------
-        ValueError
-            If file extension is not JSON or YAML.
         """
         # Initialize empty nested dict
         report = {n: {m: '' for m in self.gpa_types} for n in self.gpa_scales}
@@ -177,20 +166,44 @@ class Transcript:
         for gpa_scale in report.keys():
             for gpa_type in report[gpa_scale].keys():
                 report[gpa_scale][gpa_type] = self.calculate_gpa(
-                    periods, round_place, gpa_scale, gpa_type)
-
-        if file_path:
-            file_name, file_extension = os.path.splitext(file_path)
-            if file_extension == '.json':
-                with open(file_path, 'w') as fp:
-                    json.dump(report, fp, indent=4)
-                print(f'"{file_path}" created/updated.')
-            elif (file_extension == '.yml') or (file_extension == '.yaml'):
-                with open(file_path, 'w') as fp:
-                    yaml.dump(report, fp)
-                print(f'"{file_path}" created/updated.')
-            else:
-                raise ValueError(
-                    '"{file_extension}" is not a valid file extension.')
+                    gpa_scale, gpa_type, periods, round_place)
 
         return report
+
+    def gpa_report_to_file(self, file_path='gpa_report.yaml',
+                              periods=None, round_place=3):
+        """
+        Outputs GPA report to either a JSON or YAML file.
+
+        Parameters
+        ----------
+        file_path : str, default 'gpa_report.yaml'
+            If provided, prints the computed GPA report as either a JSON
+            or YAML.
+        periods : list of tuples of int, str; default None
+            If provided, determines the grading periods (i.e., semesters)
+            over which GPA should be calculated.
+            Ex. [(2018, 'Fall'), (2019, 'Spring')]
+        round_place: int, default None
+            If provided, will round the output to the specified number of
+            places after the decimal.
+
+        Raises
+        ------
+        ValueError
+            If file path extension is not JSON or YAML.
+        """
+        report = self.gpa_report(round_place=round_place)
+
+        file_name, file_extension = os.path.splitext(file_path)
+        if file_extension == '.json':
+            with open(file_path, 'w') as fp:
+                json.dump(report, fp, indent=4)
+            print(f'"{file_path}" created/updated.')
+        elif (file_extension == '.yml') or (file_extension == '.yaml'):
+            with open(file_path, 'w') as fp:
+                yaml.dump(report, fp)
+            print(f'"{file_path}" created/updated.')
+        else:
+            raise ValueError(
+                '"{file_extension}" is not a valid file extension.')

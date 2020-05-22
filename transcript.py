@@ -4,6 +4,61 @@ import json
 import yaml
 import os
 
+# Define the GPA scales to be used in calculations.
+gpa_scales = {
+    "University": {
+        "A+": 4.000,
+        "A": 4.000,
+        "A-": 3.670,
+        "B+": 3.330,
+        "B": 3.000,
+        "B-": 2.670,
+        "C+": 2.330,
+        "C": 2.000,
+        "C-": 1.670,
+        "D+": 1.330,
+        "D": 1.000,
+        "D-": 0.670,
+        "F": 0.000,
+        "CR": 0.000,
+        "NC": 0.000
+    },
+    "AMCAS": {
+        "A+": 4.0,
+        "A": 4.0,
+        "A-": 3.7,
+        "B+": 3.3,
+        "B": 3.0,
+        "B-": 2.7,
+        "C+": 2.3,
+        "C": 2.0,
+        "C-": 1.7,
+        "D+": 1.3,
+        "D": 1.0,
+        "D-": 0.7,
+        "F": 0.0,
+        "CR": 0.0,
+        "NC": 0.0
+    },
+    "TMDSAS": {
+        "A+": 4.0,
+        "A": 4.0,
+        "A-": 4.0,
+        "B+": 3.0,
+        "B": 3.0,
+        "B-": 3.0,
+        "C+": 2.0,
+        "C": 2.0,
+        "C-": 2.0,
+        "D+": 1.0,
+        "D": 1.0,
+        "D-": 1.0,
+        "F": 0.0,
+        "CR": 0.0,
+        "NC": 0.0
+    }
+}
+
 
 class Transcript:
     """
@@ -45,9 +100,6 @@ class Transcript:
     """
 
     def __init__(self, csv_file):
-        with open('gpa_scales.json', 'r') as f:
-            gpa_scales = json.load(f)
-
         df = pd.read_csv(csv_file)
         for col in list(df.columns):
             if df[col].dtype == 'object':
@@ -65,8 +117,11 @@ class Transcript:
         self.gpa_scales = ['University', 'AMCAS', 'TMDSAS']
         self.gpa_types = ['Overall', 'BCPM', 'AO']
 
-    def calculate_gpa(self, gpa_scale, gpa_type,
-                      periods=None, round_place=None):
+    def calculate_gpa(self,
+                      gpa_scale,
+                      gpa_type,
+                      periods=None,
+                      round_place=None):
         """
         Calculates cumulative GPAs, or over a given set of grading periods.
 
@@ -170,8 +225,10 @@ class Transcript:
 
         return report
 
-    def gpa_report_to_file(self, file_path='gpa_report.yaml',
-                              periods=None, round_place=3):
+    def gpa_report_to_file(self,
+                           file_path='gpa_report.yaml',
+                           periods=None,
+                           round_place=3):
         """
         Outputs GPA report to either a JSON or YAML file.
 

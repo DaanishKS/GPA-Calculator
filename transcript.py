@@ -1,8 +1,9 @@
-import pandas as pd
-import numpy as np
 import json
-import yaml
 import os
+
+import numpy as np
+import pandas as pd
+import yaml
 
 # Define the GPA scales to be used in calculations.
 gpa_scales = {
@@ -98,7 +99,6 @@ class Transcript:
         calculation. These types dictate which courses will be considered
         when calculating a GPA.
     """
-
     def __init__(self, csv_file):
         df = pd.read_csv(csv_file)
         for col in list(df.columns):

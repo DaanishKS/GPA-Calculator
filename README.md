@@ -21,30 +21,7 @@ As seen above, the `Course` column, which contains the name of the course, can b
 
 If you have Python 3 installed on your system, the most straightforward way to use the application is to first install `pipenv` and then execute the `cli.py` module as follows:
 
-```console
-$ pip install pipenv
-$ pipenv run python cli.py
+```shell
+pip install pipenv
+pipenv run python cli.py
 ```
-
-Alternatively, you can execute the `gpa_calculator_v0.3.exe` file:
-
-```console
-$ .\gpa_calculator_v0.3.exe
-```
-
-**Note:** If executing from the File Explorer or Desktop GUIs, make sure that the `gpa_calculator_v0.3.exe` file and transcript CSV file are in the same directory.
-
-If you wish to build the executable file yourself, use the following sequence of commands:
-
-```console
-$ pip install pipenv
-$ pipenv shell
-$ pipenv install --dev
-$ pyinstaller cli.py -F -n gpa_calculator_v0.3 --hidden-import="pkg_resources.py2_warn"
-```
-
-## Releases
-
-+ Version 0.3
-  + Date: 2020-05-22
-  + Windows: [gpa_calculator_v0.3.exe](http://daanishks.com/assets/software/gpa_calculator_v0.3.exe)
